@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { gameStore } from '../src/stores/gameStore.ts';
+
+test('공유 상태: 일관된 거래 결과 알림, 가격 반영, 실패 시 상태 보존과 구독 해제', () => {
+    const initial = gameStore.getSnapshot();
+    assert.equal(gameStore.getSnapshot(), initial);
+    const seen = [];
+    const unsubscribe = gameStore.subscribe(() => seen.push(gameStore.getSnapshot()));
+    gameStore.buy('herb');
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].economy.gold, 980);
+    assert.equal(seen[0].economy.inventory.herb, 1);
+    gameStore.setPrice('herb', 50);
+    assert.equal(seen.length, 2);
+    assert.equal(seen[1].economy.prices.herb, 50);
+    gameStore.sell('herb');
+    assert.equal(seen.length, 3);
+    assert.equal(seen[2].economy.gold, 1030);
+    assert.equal(seen[2].economy.inventory.herb, 0);
+    const beforeFailure = gameStore.getSnapshot();
+    gameStore.sell('herb');
+    assert.equal(seen.length, 4);
+    assert.equal(gameStore.getSnapshot().success, false);
+    assert.equal(gameStore.getSnapshot().economy, beforeFailure.economy);
+    assert.equal(gameStore.getSnapshot().revision, initial.revision + 4);
+    unsubscribe();
+    unsubscribe();
+    gameStore.buy('herb');
+    assert.equal(seen.length, 4);
+    assert.equal(gameStore.getSnapshot().economy.gold, 1010);
+    assert.equal(initial.economy.gold, 1000);
+});
