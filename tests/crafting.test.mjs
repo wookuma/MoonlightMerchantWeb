@@ -12,7 +12,7 @@ function balance(state) {
     assert.equal(state.gold, 1000 - state.purchaseSpend + state.revenue);
 }
 function checkpoint(economy) {
-    return { economy, day: { number: 1, phase: 'preparing', completedVisits: 0, baseline: null, summary: null, report: null }, visitCount: 0, checkpoint: 'before-open' };
+    return { economy, day: { number: 1, phase: 'preparing', completedVisits: 0, explorationUsed: 0, baseline: null, summary: null, report: null }, visitCount: 0, checkpoint: 'before-open' };
 }
 function storage(raw = null) {
     return { raw, getItem() { return this.raw; }, setItem(_key, value) { this.raw = value; } };

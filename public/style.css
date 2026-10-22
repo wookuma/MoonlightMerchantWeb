@@ -358,3 +358,151 @@ body { min-width: 320px; overflow: hidden; }
  .game-modal-foot { padding-top: 8px; padding-bottom: 8px; }
  .modal-feedback { max-height: 48px; padding-top: 6px; padding-bottom: 6px; }
 }
+
+/* Moonlight v1 — walnut, plum velvet and antique brass. Art remains separate from live UI. */
+:root { --moon-gold: #d4ae6d; --moon-ink: #1d1525; --moon-panel: #2a1e34; }
+.game-viewport { padding: 8px; background: radial-gradient(ellipse at 50% 35%, #32233e, #110f19 78%); }
+.game-shell { width: min(1120px, calc(100vw - 20px), calc((100dvh - 250px) * 4 / 3)); grid-template-rows: 58px auto 60px 88px; gap: 0; padding: 4px; border: 6px ridge #80603e; border-radius: 5px; background: #1b1323; box-shadow: 0 0 0 2px #17101c, 0 24px 80px #0009, inset 0 0 0 1px #c19a60; }
+.shell-topbar { padding: 4px 10px; border: 1px solid #89643d; background: linear-gradient(0deg, #211527, #322039 50%, #231829); box-shadow: inset 0 0 0 2px #170f1d; }
+.shell-brand { gap: 8px; }
+.shell-brand strong { font-family: Georgia, serif; font-weight: 700; color: #efd4a0; font-size: 20px; text-shadow: 1px 2px #110e17; }
+.shell-brand small { color: #bca27f; }
+.shell-hud { gap: 12px; }
+.shell-hud > span { color: #e1cbab; padding: 8px 10px; border-left: 1px solid #735139; }
+.shell-gold { color: #f1cd78; text-shadow: 1px 2px #160f1c; font-variant-numeric: tabular-nums; }
+.shell-icon-button { background: linear-gradient(#40304c, #25192e); border: 2px ridge #9f7a49; border-radius: 3px; color: #ebcf9c; }
+.game-stage { border-radius: 0; border: 2px solid #422a34; box-shadow: inset 0 0 0 1px #b38b54; }
+.stage-event { top: 8px; left: 8px; border: 1px solid #ac8957; border-radius: 3px; background: #25182de8; box-shadow: 2px 3px 0 #100c16aa; }
+.stage-caption { padding: 4px 8px; background: #201524cf; color: #ddc6a6; border: 1px solid #6d503c; border-radius: 3px; }
+.game-statusbar { padding: 7px 10px; border: 2px ridge #9a7447; border-radius: 0; background: linear-gradient(#30213b, #1e1628); gap: 10px; }
+.status-copy strong { color: #ead8b7; }
+.status-copy > span { color: #bfaecb; }
+.open-shop-button { border: 3px ridge #c3a169; border-radius: 4px; background: linear-gradient(#6b4a85, #4a315e); color: #fff0cf; box-shadow: inset 0 0 0 1px #392047, 0 2px 0 #120c1a; font-weight: 600; }
+.open-shop-button:hover:not(:disabled) { background: linear-gradient(#815ca0, #5a3972); }
+.open-shop-button:disabled { background: #3c3043; color: #c3b0cd; }
+.game-statusbar .open-shop-button { padding: 8px 12px; }
+.game-dock { gap: 5px; padding: 5px 0 0; align-items: stretch; }
+.game-dock > button { width: auto; height: 80px; flex: 1; gap: 2px; padding: 4px 2px; border: 3px ridge #a47d4b; border-radius: 3px; background: linear-gradient(#3b2a36, #271d2d 70%, #201525); box-shadow: inset 0 0 0 2px #160f1c; color: #efdbbb; font-size: 12px; text-shadow: 1px 1px #150d1c; }
+.game-dock > button:hover { background: linear-gradient(#57405e, #38243e); border-color: #dfbd7d; transform: translateY(-1px); }
+.game-dock kbd { color: #bd9b70; font-size: 9px; }
+.dock-badge { background: #edd09a; color: #332039; box-shadow: 0 1px 5px #0008; }
+.item-icon, .dock-art, .brand-emblem { background-image: url('/assets/moonlight/icons-v1.png'); background-repeat: no-repeat; background-size: 400% 300%; image-rendering: pixelated; }
+.item-icon { display: inline-block; width: 44px; height: 44px; border-radius: 0; background-color: transparent; }
+.item-icon i { display: none; }
+.item-icon.herb { background-position: 0 0; }
+.item-icon.potion { background-position: 33.333333% 0; }
+.item-icon.sword { background-position: 66.666667% 0; }
+.item-icon.mushroom { background-position: 100% 0; }
+.item-icon.manaPotion { background-position: 0 50%; }
+.dock-art.goods { background-position: 33.333333% 50%; }
+.dock-art.craft { background-position: 66.666667% 50%; }
+.dock-art.prepare { background-position: 100% 50%; }
+.dock-art.quests { background-position: 0 100%; }
+.dock-art.upgrade { background-position: 33.333333% 100%; }
+.dock-art.ledger { background-position: 66.666667% 100%; }
+.brand-emblem, .dock-art.settings { background-position: 100% 100%; }
+.shell-brand > .brand-emblem { display: block; flex: 0 0 auto; width: 40px; height: 40px; }
+.status-star.brand-emblem { display: block; flex: 0 0 auto; width: 28px; height: 28px; }
+.game-dock .dock-art { width: 48px; height: 48px; flex: 0 0 auto; }
+.game-modal { background: linear-gradient(135deg, #2d2139, #21192d); border: 4px ridge #ad8755; border-radius: 6px; color: #eadfcf; box-shadow: 0 20px 100px #000b, inset 0 0 0 1px #63424d; }
+.game-modal-head { background: linear-gradient(#37243e, #24192f); border-bottom: 2px ridge #896440; }
+.modal-title-group { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.modal-menu-art { display: block; width: 48px; height: 48px; flex: 0 0 auto; }
+.game-modal-head h2 { color: #eed4a3; text-shadow: 1px 2px #140f1c; }
+.shop-flow-navigation { background: #251b30; border-color: #74523d; }
+.shop-flow-links button[aria-pressed="true"] { background: #46304e; border-color: #ccaa70; }
+.game-modal-foot { border-top: 2px ridge #8c6943; background: #24192e; }
+.modal-feedback { background: #34273d; color: #e1c7a2; }
+.modal-feedback.error { background: #402833; color: #ffc4b1; }
+.product, .recipe, .preparation-options article, .objective-cards article { border-color: #765844; background: linear-gradient(135deg, #33253d, #251d30); border-radius: 5px; }
+.product-selector button { background: #2d2036; border-color: #70513e; color: #e6d4bd; }
+.product-selector button[aria-pressed="true"] { border-color: #d3ab6c; background: #483347; box-shadow: inset 3px 0 #bf9557; }
+.product-selector .item-icon { width: 32px; height: 32px; transform: none; }
+.product-actions button, .quantity-row button, .quantity-presets button, .workflow-secondary, .display-actions button, .price-apply { border-color: #937046; background: #45314f; color: #f1dbb5; }
+.product-actions .sell-button { background: #334336; border-color: #789061; }
+.management-tabs { border-color: #72533f; }
+.management-tabs button[aria-pressed="true"] { color: #f1d29b; border-color: #d4ad70; }
+.price-input, .quantity-row input { background: #1e1627; border-color: #7a5b47; }
+.character-art { background-image: url('/assets/moonlight/characters-v1.png'); background-size: 300% 200%; background-repeat: no-repeat; image-rendering: pixelated; }
+.character-art.herb { background-position: 0 0; }
+.character-art.potion { background-position: 50% 0; }
+.character-art.sword { background-position: 100% 0; }
+.character-art.mushroom { background-position: 0 100%; }
+.character-art.manaPotion { background-position: 50% 100%; }
+.customer-portrait { width: 96px; height: 96px; float: right; margin: 0 0 12px 18px; }
+@media (max-width: 600px) {
+ .game-shell { width: min(calc(100vw - 14px), calc((100dvh - 230px) * 4 / 3)); grid-template-rows: 54px auto 58px 78px; border-width: 4px; padding: 3px; }
+ .shell-topbar { padding: 4px 6px; gap: 6px; } .shell-brand strong { font-size: 13px; } .shell-brand small { font-size: 9px; } .shell-brand { gap: 3px; }
+ .shell-brand > .brand-emblem { width: 30px; height: 30px; } .shell-hud { gap: 6px; } .shell-hud > span { display: none; } .shell-gold { font-size: 15px; }
+ .game-dock { gap: 3px; } .game-dock > button { height: 72px; border-width: 2px; font-size: 9px; gap: 3px; } .game-dock .dock-art { width: 38px; height: 38px; }
+ .status-star.brand-emblem { display: none; } .game-statusbar { gap: 7px; padding: 6px 7px; }
+ .game-statusbar .open-shop-button { padding: 8px; font-size: 10px; }
+ .modal-menu-art { width: 38px; height: 38px; } .modal-title-group { gap: 8px; }
+ .game-modal-head h2 { font-size: 18px; } .product-selector .item-icon { display: block; width: 24px; height: 24px; }
+ .product-selector button { padding: 8px; gap: 5px; } .customer-portrait { width: 72px; height: 72px; margin-left: 8px; }
+}
+@media (max-height: 620px) {
+ .game-shell { width: min(1000px, calc(100vw - 16px), calc((100dvh - 176px) * 4 / 3)); grid-template-rows: 40px auto 44px 62px; }
+ .shell-brand strong, .shell-brand small { display: none; } .shell-brand > .brand-emblem { width: 29px; height: 29px; }
+ .game-dock > button { height: 56px; gap: 0; font-size: 9px; } .game-dock .dock-art { width: 32px; height: 32px; }
+ .modal-menu-art { width: 28px; height: 28px; } .game-statusbar .open-shop-button { padding: 5px 10px; }
+}
+
+/* 각 매대는 실제 진열대와 같은 좌표의 버튼이다. */
+.shelf-hotspots { position: absolute; inset: 0; pointer-events: none; }
+.shelf-hotspot { position: absolute; top: 16%; width: 13%; height: 32%; padding: 0; pointer-events: auto; border: 1px solid transparent; border-radius: 5px; background: transparent; box-shadow: none; }
+.shelf-hotspot > span { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); padding: 5px 7px; background: #2b1c36f2; color: #ffe4ac; border: 1px solid #d2aa68; border-radius: 3px; white-space: nowrap; font-size: 10px; opacity: 0; pointer-events: none; }
+.shelf-hotspot:hover, .shelf-hotspot:focus-visible { background: #f5d28a0c; border-color: #edc67a; box-shadow: inset 0 0 16px #e8b76522, 0 0 8px #e8b76544; }
+.shelf-hotspot:hover > span, .shelf-hotspot:focus-visible > span { opacity: 1; }
+.shelf-hotspot:focus-visible { outline: 2px solid #ffe1a0; outline-offset: 2px; }
+.shelf-registration-note { margin: 0 0 16px; padding: 10px 12px; border-left: 2px solid #c5a06a; background: #403048; color: #ead2ae; font-size: 12px; line-height: 1.7; }
+@media (max-width: 600px) { .shelf-hotspot > span { font-size: 8px; padding: 4px; } }
+
+/* 달빛 숲: 기존 상점 프레임 안에서 여는 수집 모달. */
+.forest-entry { position: absolute; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 7px; padding: 7px 10px; border: 2px ridge #bd9a60; border-radius: 4px; background: linear-gradient(#344338f2,#202d27f2); color: #f0debb; box-shadow: 0 3px 12px #0007; font-size: 12px; text-align: left; }
+.forest-entry .item-icon { width: 32px; height: 32px; }
+.forest-entry small { display: block; margin-top: 4px; font-size: 9px; color: #c5d0b1; }
+.stage-caption { max-width: calc(100% - 158px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dock-art.forest { background-position: 0 0; }
+.foraging-intro { display: flex; align-items: center; gap: 15px; }
+.foraging-intro > .item-icon { width: 70px; height: 70px; }
+.foraging-intro h3 { color: #eddaa8; font-size: 17px; }
+.foraging-intro p { color: #c2b8cb; font-size: 13px; line-height: 1.8; }
+.foraging-budget { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 15px; margin: 18px 0; border: 1px solid #6d7753; border-radius: 6px; background: #2e382e; font-size: 12px; color: #d2d7b9; }
+.foraging-budget strong { margin-left: auto; font-size: 25px; color: #f2ddb1; }
+.foraging-budget small { font-size: 12px; }
+.foraging-cards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.foraging-cards article { padding: 18px; border: 1px solid #776043; border-radius: 6px; background: #30283a; }
+.foraging-cards article > .item-icon { width: 76px; height: 76px; display: block; margin: 0 auto 10px; }
+.foraging-cards h3 { color: #ead3a8; font-size: 16px; }
+.foraging-cards p { color: #beb2c8; font-size: 12px; line-height: 1.8; min-height: 44px; }
+.foraging-cards article > div { margin: 12px 0; font-size: 12px; color: #d2c3da; }
+.foraging-cards .open-shop-button { width: 100%; padding: 10px; font-size: 12px; }
+.foraging-next { display: flex; gap: 10px; margin-top: 14px; }
+.forest-preparation-link { margin-bottom: 18px; }
+@media (max-width: 600px) { .forest-entry { right: 7px; bottom: 7px; gap: 4px; padding: 5px 7px; font-size: 10px; } .forest-entry .item-icon { width: 26px; height: 26px; } .forest-entry small { font-size: 8px; } .stage-caption { max-width: calc(100% - 125px); } .foraging-cards { grid-template-columns: minmax(0,1fr); } .foraging-cards p { min-height: 0; } .foraging-next { flex-direction: column; } .foraging-intro > .item-icon { width: 52px; height: 52px; } .foraging-intro h3 { font-size: 15px; } }
+@media (max-height: 620px) { .forest-entry { padding: 4px 8px; font-size: 10px; } .forest-entry .item-icon { width: 24px; height: 24px; } .forest-entry small { display: none; } }
+
+/* 실제 오늘 매출과 남은 손님 수를 중앙 게임 화면에서 확인한다. */
+.stage-sales-hud { position: absolute; top: 8px; right: 8px; padding: 9px 12px; border: 1px solid #ad8854; border-radius: 4px; background: #21172def; box-shadow: 2px 3px 0 #100c16aa; pointer-events: none; }
+.stage-sales-hud dl { display: flex; gap: 16px; margin: 0; }
+.stage-sales-hud dt { margin-bottom: 5px; color: #cbb898; font-size: 10px; }
+.stage-sales-hud dd { margin: 0; color: #f3d48b; font-size: 19px; font-variant-numeric: tabular-nums; }
+.stage-sales-hud dd small { font-size: 10px; color: #d8c6a9; }
+.stage-sales-hud p { margin: 6px 0 0; color: #ae9ebc; font-size: 9px; }
+.shelf-hotspot[data-stock="stockout"]:hover, .shelf-hotspot[data-stock="stockout"]:focus-visible { border-color: #e4a08c; }
+.shelf-hotspot[data-stock="unlisted"]:hover, .shelf-hotspot[data-stock="low"]:hover { border-color: #f0cf8d; }
+@media (max-width: 600px) { .stage-sales-hud { top: 7px; right: 7px; padding: 6px 8px; } .stage-sales-hud dl { gap: 10px; } .stage-sales-hud dt { font-size: 8px; margin-bottom: 3px; } .stage-sales-hud dd { font-size: 14px; } .stage-sales-hud dd small { font-size: 8px; } .stage-sales-hud p { display: none; } }
+@media (max-height: 620px) { .stage-sales-hud { padding: 5px 8px; } .stage-sales-hud dl { gap: 10px; } .stage-sales-hud dt { font-size: 8px; margin-bottom: 2px; } .stage-sales-hud dd { font-size: 13px; } .stage-sales-hud p { display: none; } }
+
+/* 준비 도우미의 상품별 실행은 표시된 수량·비용으로 한 번씩 처리한다. */
+.preparation-row-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.preparation-row-actions button { display: flex; flex-direction: column; gap: 5px; padding: 9px 11px; border: 1px solid #a48250; border-radius: 5px; background: linear-gradient(#493351,#33243f); text-align: left; color: #f0d8ac; font: inherit; font-size: 12px; }
+.preparation-row-actions button:hover:not(:disabled) { border-color: #e4bd79; background: #523a5c; }
+.preparation-row-actions button:disabled { opacity: .55; }
+.preparation-row-actions button > span { color: #f0d8ac; font-size: 12px; line-height: 1.4; }
+.preparation-row-actions button small { display: block; color: #c3b2ce; font-size: 10px; line-height: 1.5; }
+.preparation-ready { color: #c1d9a5 !important; }
+.preparation-action-error { color: #f3b8a4 !important; }
+.preparation-table td:last-child { min-width: 215px; }
+@media (max-width: 600px) { .preparation-row-actions { flex-direction: column; } .preparation-row-actions button { padding: 8px 10px; } .preparation-table td:last-child { min-width: 205px; } }

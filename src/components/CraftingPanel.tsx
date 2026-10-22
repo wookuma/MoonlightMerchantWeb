@@ -3,6 +3,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { recipes } from '../domain/crafting';
 import { items, storedQuantity } from '../domain/economy';
 import { parseQuantity, previewCraft } from '../domain/orderPreview';
+import { gameUiStore } from '../stores/gameUiStore';
 import { gameStore } from '../stores/gameStore';
 
 function RecipeCard({ recipe }: { recipe: typeof recipes[number] }) {
@@ -29,6 +30,7 @@ export function CraftingPanel() {
     return <section className="crafting-panel" aria-labelledby="crafting-title">
         <span className="eyebrow">A LITTLE ALCHEMY</span>
         <h2 id="crafting-title">작은 연금술 작업대</h2>
+        <button className="workflow-secondary" onClick={() => gameUiStore.open('forest')}>재료가 부족하면 · 숲 탐색 →</button>
         {recipes.map(recipe => <RecipeCard key={recipe.id} recipe={recipe} />)}
         <p className="panel-note">제작은 골드 대신 재료를 사용합니다. 진열한 재료는 회수 후 사용할 수 있어요. 완성품은 보관 재고로 들어가며 개점할 때 함께 저장돼요.</p>
     </section>;

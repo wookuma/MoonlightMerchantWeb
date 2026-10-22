@@ -78,5 +78,5 @@ test('묶음 작업 후 준비 도우미 갱신, 개점 전 저장·중간 복�
     assert.equal(store.getSnapshot().day.summary.buyers,2);assert.equal(store.getSnapshot().day.summary.profit,50);
     assert.equal(store.getSnapshot().economy.inventoryCosts.potion,40);
     const loaded=createGameStore(createSaveRepository(port));assert.deepEqual(loaded.getSnapshot().day.summary,store.getSnapshot().day.summary);
-    assert.equal(JSON.parse(port.raw).version,SAVE_VERSION);assert.equal(SAVE_VERSION,7);
+    assert.equal(JSON.parse(port.raw).version,SAVE_VERSION);assert.equal(SAVE_VERSION,8);
 });

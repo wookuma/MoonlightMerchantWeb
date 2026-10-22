@@ -9,19 +9,19 @@ import { bindMenuPause } from '../src/game/menuPause.ts';
 
 // 엔진의 paused 플래그와 남은 시간을 모델링한다. 실제 방문 연결 코드를 그대로 사용한다.
 function timedScene() {
-    const moves=[],timers=[];
-    const drawing=Object.fromEntries(['fillStyle','fillEllipse','fillRect'].map(key=>[key,function(){return this;} ]));
+    const moves=[],timers=[],sprites=[];
     const scene={
-        add:{graphics:()=>Object.create(drawing),text:()=>({setOrigin(){return this;},setText(){return this;}}),container:()=>({setDepth(){return this;},setVisible(){return this;},setPosition(){return this;}})},
+        add:{sprite:()=>{const sprite={elapsed:0,playing:false,anims:{isPaused:false,pause(){this.isPaused=true;},resume(){this.isPaused=false;}},play(){this.playing=true;return this;},stop(){this.playing=false;return this;},setTexture(){return this;},setDisplaySize(){return this;},setOrigin(){return this;},setFrame(){return this;},setFlipX(){return this;}};sprites.push(sprite);return sprite;},text:()=>({setOrigin(){return this;},setText(){return this;},setVisible(){return this;},setAlpha(){return this;},setY(){return this;}}),container:()=>({setDepth(){return this;},setVisible(){return this;},setPosition(){return this;}})},
         tweens:{paused:false,startTime:0,prevTime:0,add(config){const move={config,elapsed:0,stopped:false,done:false,stop(){this.stopped=true;}};moves.push(move);return move;}},
         time:{paused:false,delayedCall(delay,callback){const timer={delay,callback,elapsed:0,removed:false,remove(){this.removed=true;}};timers.push(timer);return timer;}},
     };
     function advance(ms){
         const oldMoves=[...moves],oldTimers=[...timers];
-        if(!scene.tweens.paused)for(const move of oldMoves)if(!move.stopped&&!move.done){move.elapsed+=ms;if(move.elapsed>=move.config.duration){move.done=true;move.config.onComplete();}}
+        for(const sprite of sprites)if(sprite.playing&&!sprite.anims.isPaused)sprite.elapsed+=ms;
+        if(!scene.tweens.paused)for(const move of oldMoves)if(!move.stopped&&!move.done){move.elapsed+=ms;if(move.elapsed>=(move.config.delay??0)&&!move.started){move.started=true;move.config.onStart?.();}if(move.elapsed>=move.config.duration+(move.config.delay??0)){move.done=true;move.config.onComplete();}}
         if(!scene.time.paused)for(const timer of oldTimers)if(!timer.removed){timer.elapsed+=ms;if(timer.elapsed>=timer.delay){timer.removed=true;timer.callback();}}
     }
-    return{scene,moves,timers,advance};
+    return{scene,moves,timers,sprites,advance};
 }
 
 test('이동·구매 대기·퇴장 도중 메뉴를 열면 남은 시간 보존, 메뉴 전환 후 닫을 때 한 번만 재개',()=>{
@@ -29,7 +29,7 @@ test('이동·구매 대기·퇴장 도중 메뉴를 열면 남은 시간 보존
     const unpause=bindMenuPause(view.scene,ui),detach=attachCustomerVisit(view.scene,store,ui);
     store.buy('herb');store.setDisplay('herb',1);store.startDay();
     view.advance(500);ui.open('quests');view.advance(5000);ui.open('upgrade');view.advance(5000);
-    assert.equal(store.getSnapshot().visit.phase,'arriving');assert.equal(view.moves[0].elapsed,500);assert.equal(view.moves.length,1);
+    assert.equal(store.getSnapshot().visit.phase,'arriving');assert.equal(view.moves[0].elapsed,500);assert.equal(view.moves.length,1);assert.equal(view.sprites[0].elapsed,500);
     ui.close();view.advance(999);assert.equal(store.getSnapshot().visit.phase,'arriving');view.advance(1);
     assert.equal(store.getSnapshot().visit.phase,'browsing');assert.equal(view.timers.length,1);
     view.advance(700);ui.open('goods');view.advance(50000);assert.equal(view.timers[0].elapsed,700);assert.equal(store.getSnapshot().economy.unitsSold,0);

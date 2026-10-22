@@ -1,16 +1,17 @@
-import { claimedRewardGold, completeDayObjectives, createObjectiveProgress, markObjective, objectives } from '../../domain/objectives.ts';
+import { claimedRewardGold, objectives } from '../../domain/objectives.ts';
 import type { ObjectiveProgress } from '../../domain/objectives.ts';
-import { decodeSave as decodeLegacySave } from './legacySaveData.ts';
-import { createInitialState, itemValues, items } from '../../domain/economy.ts';
+import { decodeSave as decodeLegacySave } from './legacyV7SaveData.ts';
+import { itemValues, items } from '../../domain/economy.ts';
 import { dailyCustomers, expansionStage } from '../../domain/shopExpansion.ts';
 import type { EconomyState } from '../../domain/economy.ts';
 import { declineReasons } from '../../domain/salesReport.ts';
 import type { SalesReport } from '../../domain/salesReport.ts';
+import { DAILY_EXPLORATIONS } from '../../domain/foraging.ts';
 import { CUSTOMERS_PER_DAY } from '../../domain/shopDay.ts';
 import type { DaySummary, ShopDay } from '../../domain/shopDay.ts';
 
-export const SAVE_VERSION = 7;
-export type SavePoint = 'before-open' | 'closed' | 'next-day' | 'new-game';
+export const SAVE_VERSION = 8;
+export type SavePoint = 'before-open' | 'closed' | 'next-day' | 'new-game' | 'exploration';
 export type SavedState = Readonly<{ economy: EconomyState; day: ShopDay; visitCount: number; checkpoint: SavePoint }>;
 export type DecodeResult = { ok: true; state: SavedState } | { ok: false; message: string };
 type DisplayEconomy = Omit<EconomyState, 'expansionLevel' | 'expansionSpend'>;
@@ -30,14 +31,14 @@ function commonEconomy(value: unknown, expanded = false, tracked = false): value
     if (tracked && !isObjectiveProgress(value.objectives)) return false;
     const rewards = tracked ? claimedRewardGold(value.objectives as ObjectiveProgress) : 0;
     if (!natural(spend) || value.gold !== 1000 + rewards - value.purchaseSpend - spend + value.revenue) return false;
-    return value.unitsSold === 0 ? value.revenue === 0 && value.costOfGoodsSold === 0 : value.revenue >= value.unitsSold && value.costOfGoodsSold >= value.unitsSold;
+    return value.unitsSold === 0 ? value.revenue === 0 && value.costOfGoodsSold === 0 : value.revenue >= value.unitsSold;
 }
 
 function costEconomy(value: unknown, expanded = false, tracked = false): value is CostEconomy {
     if (!object(value)) return false;
     const costs = value.inventoryCosts;
     if (!commonEconomy(value, expanded, tracked) || !object(costs)) return false;
-    if (!items.every(item => natural(costs[item.id]) && (value.inventory[item.id] === 0 ? costs[item.id] === 0 : Number(costs[item.id]) >= value.inventory[item.id]))) return false;
+    if (!items.every(item => natural(costs[item.id]) && (value.inventory[item.id] !== 0 || costs[item.id] === 0))) return false;
     const stockCost = items.reduce((sum, item) => sum + Number(costs[item.id]), 0);
     return natural(stockCost) && natural(stockCost + value.costOfGoodsSold) && value.purchaseSpend === stockCost + value.costOfGoodsSold;
 }
@@ -54,7 +55,7 @@ function isEconomy(value: unknown, tracked = false): value is EconomyState {
 function isTotals(value: unknown, legacy: boolean): value is Pick<EconomyState, 'revenue' | 'costOfGoodsSold' | 'unitsSold'> {
     if (!object(value) || !natural(value.revenue) || !natural(value.costOfGoodsSold) || !natural(value.unitsSold)) return false;
     if (value.unitsSold === 0 && (value.revenue !== 0 || value.costOfGoodsSold !== 0)) return false;
-    if (value.revenue < value.unitsSold || value.costOfGoodsSold < value.unitsSold) return false;
+    if (value.revenue < value.unitsSold) return false;
     return !legacy || (value.costOfGoodsSold % 20 === 0 && value.unitsSold <= value.costOfGoodsSold / 20 && value.unitsSold >= value.costOfGoodsSold / 120);
 }
 
@@ -67,7 +68,7 @@ function isSummary(value: unknown): value is DaySummary {
 function validDay(value: Record<string, unknown>, economy: LegacyEconomy, legacy = false, limit: number = CUSTOMERS_PER_DAY, expanded = false): boolean {
     if (!object(value.day) || !natural(value.visitCount)) return false;
     const { day, visitCount } = value;
-    if (!positive(day.number) || !Number.isSafeInteger(day.number * limit)) return false;
+    if (!positive(day.number) || !Number.isSafeInteger(day.number * limit) || !natural(day.explorationUsed) || day.explorationUsed > DAILY_EXPLORATIONS) return false;
     // Past days can have used smaller stages. Every stage adds two visitors.
     const completedDays = day.number - 1;
     const priorVisits = day.phase === 'closed' ? visitCount - limit : visitCount;
@@ -77,7 +78,7 @@ function validDay(value: Record<string, unknown>, economy: LegacyEconomy, legacy
         : priorVisits === completedDays * CUSTOMERS_PER_DAY;
     if (!validHistory) return false;
     if (day.phase === 'preparing') {
-        const checkpoint = value.checkpoint === 'before-open' || value.checkpoint === 'next-day' || value.checkpoint === 'new-game';
+        const checkpoint = value.checkpoint === 'before-open' || value.checkpoint === 'next-day' || value.checkpoint === 'new-game' || value.checkpoint === 'exploration';
         return checkpoint && day.completedVisits === 0 && day.baseline === null && day.summary === null;
     }
     if (day.phase !== 'closed' || value.checkpoint !== 'closed' || day.completedVisits !== limit) return false;
@@ -89,7 +90,7 @@ function validDay(value: Record<string, unknown>, economy: LegacyEconomy, legacy
         && summary.revenue === economy.revenue - baseline.revenue
         && summary.costOfGoodsSold === economy.costOfGoodsSold - baseline.costOfGoodsSold
         && summary.profit === summary.revenue - summary.costOfGoodsSold
-        && (summary.buyers === 0 ? summary.revenue === 0 && summary.costOfGoodsSold === 0 : summary.revenue >= summary.buyers && summary.costOfGoodsSold >= summary.buyers);
+        && (summary.buyers === 0 ? summary.revenue === 0 && summary.costOfGoodsSold === 0 : summary.revenue >= summary.buyers);
     return consistent && (!legacy || (summary.costOfGoodsSold >= summary.buyers * 20 && summary.costOfGoodsSold <= summary.buyers * 120));
 }
 
@@ -129,17 +130,18 @@ function validCraftedInventory(value: EconomyState): boolean {
     });
 }
 
-function upgradeObjectives(state: SavedState): SavedState {
-    let economy: EconomyState = { ...state.economy, objectives: createObjectiveProgress(), craftedInventory: itemValues(() => 0), craftedDisplayed: itemValues(() => 0) };
-    if (state.day.number > 1) economy = markObjective(economy, 'firstDay');
-    if (state.day.phase === 'closed' && state.day.summary) economy = completeDayObjectives(economy, state.day.summary);
-    return { ...state, economy };
+// 현재 제작법은 재료 수량보다 완성품 수량이 많아지지 않는다.
+// 매입액을 넉넉한 매입 수량 상한으로 삼고 일일 수집 상한을 더해 비정상 재고·오버플로를 거부한다.
+function validSupply(state: SavedState): boolean {
+    const units = items.reduce((sum,item) => sum + state.economy.inventory[item.id], 0) + state.economy.unitsSold;
+    const maximum = state.economy.purchaseSpend + (state.day.number - 1) * DAILY_EXPLORATIONS + state.day.explorationUsed;
+    return natural(units) && natural(maximum) && units <= maximum;
 }
 
 function isSavedState(value: unknown): value is SavedState {
     return object(value) && isEconomy(value.economy, true) && validCraftedInventory(value.economy)
         && validDay(value, value.economy, false, dailyCustomers(value.economy), true)
-        && validReport(value, dailyCustomers(value.economy));
+        && validReport(value, dailyCustomers(value.economy)) && validSupply(value as SavedState);
 }
 
 function copyReport(report: SalesReport | null): SalesReport | null {
@@ -162,7 +164,7 @@ function copyState(state: SavedState): SavedState {
             prices: itemValues(item => e.prices[item.id]),
         },
         day: {
-            number: day.number, phase: day.phase, completedVisits: day.completedVisits, report: copyReport(day.report),
+            number: day.number, phase: day.phase, completedVisits: day.completedVisits, explorationUsed: day.explorationUsed, report: copyReport(day.report),
             baseline: day.baseline ? { revenue: day.baseline.revenue, costOfGoodsSold: day.baseline.costOfGoodsSold, unitsSold: day.baseline.unitsSold } : null,
             summary: day.summary ? {
                 day: day.summary.day, visitors: day.summary.visitors, buyers: day.summary.buyers, revenue: day.summary.revenue,
@@ -182,26 +184,10 @@ export function decodeSave(raw: string): DecodeResult {
     try {
         const value: unknown = JSON.parse(raw);
         if (!object(value)) return invalid();
-        if (typeof value.version === 'number' && Number.isInteger(value.version) && value.version >= 1 && value.version <= 5) {
+        if (typeof value.version === 'number' && Number.isInteger(value.version) && value.version >= 1 && value.version <= 7) {
             const decoded = decodeLegacySave(raw);
             if (!decoded.ok) return decoded;
-            const old = decoded.state, initial = createInitialState();
-            const migrated = { ...old, economy: {
-                ...initial, ...old.economy,
-                inventory: { ...initial.inventory, ...old.economy.inventory },
-                displayed: { ...initial.displayed, ...old.economy.displayed },
-                inventoryCosts: { ...initial.inventoryCosts, ...old.economy.inventoryCosts },
-                prices: { ...initial.prices, ...old.economy.prices },
-            } };
-            const upgraded = upgradeObjectives(migrated);
-            if (!isSavedState(upgraded)) return invalid();
-            return { ok: true, state: copyState(upgraded) };
-        }
-        if (value.version === 6) {
-            const state = value.state;
-            if (!object(state) || !isEconomy(state.economy) || !validDay(state, state.economy, false, dailyCustomers(state.economy), true) || !validReport(state, dailyCustomers(state.economy))) return invalid();
-            // 구버전에 없는 제작 출처를 추정하지 않는다. 검증한 기존 필드만 복사한다.
-            const upgraded = upgradeObjectives(state as SavedState);
+            const upgraded: SavedState = { ...decoded.state, day: { ...decoded.state.day, explorationUsed: 0 } };
             if (!isSavedState(upgraded)) return invalid();
             return { ok: true, state: copyState(upgraded) };
         }
@@ -214,6 +200,6 @@ export function decodeSave(raw: string): DecodeResult {
 }
 
 export function checkpointLabel(state: SavedState) {
-    const labels = { 'before-open': '개점 직전', closed: '마감', 'next-day': '준비 시작', 'new-game': '새 게임' };
+    const labels = { 'before-open': '개점 직전', closed: '마감', 'next-day': '준비 시작', 'new-game': '새 게임', exploration: '숲 탐색' };
     return `${state.day.number}일차 ${labels[state.checkpoint]}`;
 }

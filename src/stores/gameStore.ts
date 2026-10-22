@@ -3,6 +3,9 @@ import { createInitialState, setSalePrice, trade } from '../domain/economy.ts';
 import { dailyCustomers } from '../domain/shopExpansion.ts';
 import { expandShop } from '../domain/shopExpansion.ts';
 import { craft } from '../domain/crafting.ts';
+import { forage } from '../domain/foraging.ts';
+import { previewPreparationAction } from '../domain/preparationActions.ts';
+import type { PreparationAction } from '../domain/preparationActions.ts';
 import { setDisplayQuantity } from '../domain/display.ts';
 import type { EconomyState, ItemId, Result } from '../domain/economy.ts';
 import { advanceVisit, createVisit } from '../domain/customerVisit.ts';
@@ -22,7 +25,7 @@ function initialSnapshot(): Snapshot {
     return {
         economy: createInitialState(), visit: null, visitCount: 0, day: createDay(),
         message: '상품을 준비하고 영업 시작을 눌러보세요. 오늘은 손님 5명이 찾아옵니다.', success: true, revision: 0, session: 0,
-        saveInfo: { status: 'unsaved', message: '첫 자동 저장 전입니다. 개점 직전·마감·다음 날 준비 시 저장합니다.' },
+        saveInfo: { status: 'unsaved', message: '첫 자동 저장 전입니다. 숲 탐색·개점 직전·마감·다음 날 준비 시 저장합니다.' },
     };
 }
 
@@ -75,6 +78,16 @@ export function createGameStore(initialRepository?: SaveRepository) {
             }
             publish({ economy: result.state, saveInfo, message: result.message, success: true });
         },
+        forage(material: string) {
+            const result = forage(snapshot.economy, snapshot.day, material);
+            if (!result.ok) { publish({ message: result.message, success: false }); return; }
+            const saveInfo = persist({ economy: result.economy, day: result.day, visitCount: snapshot.visitCount }, 'exploration');
+            if (repository && saveInfo.status !== 'saved') {
+                publish({ saveInfo, message: '수집 결과를 저장하지 못해 재료와 탐색 횟수를 유지했습니다. 저장 상태를 확인한 뒤 다시 시도해 주세요.', success: false });
+                return;
+            }
+            publish({ economy: result.economy, day: result.day, saveInfo, message: result.message, success: true });
+        },
         expandShop() {
             if (snapshot.day.phase !== 'preparing') {
                 publish({ message: '진열대 확장은 영업 준비 시간에만 가능합니다.', success: false });
@@ -102,6 +115,17 @@ export function createGameStore(initialRepository?: SaveRepository) {
                 return;
             }
             apply(craft(snapshot.economy, recipeId, batches));
+        },
+        prepareItem(id: ItemId, action: PreparationAction, expectedRevision: number) {
+            if (snapshot.day.phase !== 'preparing') {
+                publish({ message: '준비 도우미의 작업은 영업 준비 시간에만 가능합니다.', success: false });
+                return;
+            }
+            if (expectedRevision !== snapshot.revision) {
+                publish({ message: '이미 처리했거나 준비 상태가 바뀌었습니다. 갱신된 수량과 비용을 확인한 뒤 다시 선택해 주세요.', success: false });
+                return;
+            }
+            apply(previewPreparationAction(snapshot.economy,snapshot.day,id,action).result);
         },
         setPrice(id: ItemId, price: number) {
             if (snapshot.day.phase === 'closed') {

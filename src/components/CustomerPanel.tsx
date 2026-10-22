@@ -17,6 +17,7 @@ export function CustomerPanel() {
     const item = items.find(entry => entry.id === customer?.itemId);
     return <section className="customer-panel" aria-labelledby="customer-title">
         <div className="customer-summary">
+            {open && customer && <span className={`customer-portrait character-art ${customer.itemId}`} aria-hidden="true" />}
             <span className="eyebrow">{open ? 'WELCOME TO THE SHOP' : 'PREPARE FOR A NEW DAY'}</span>
             <h2 id="customer-title">{open && customer ? customer.name : `${day.number}일차 · 영업 준비`}</h2>
             <p>{open && customer ? `“${customer.request}”` : `상품을 매입·제작한 뒤 진열해 주세요. 손님 ${limit}명이 진열된 상품만 구매합니다.`}</p>

@@ -100,13 +100,13 @@ for(const phase of ['preparing','closed'])test(`실제 버전 6 ${phase} 호환:
     const {economy}=store.getSnapshot();assert.equal(store.getSnapshot().saveInfo.status,'saved');assert.equal(p.raw,raw);assert.equal(p.writes,0);
     assert.equal(economy.gold,old.state.economy.gold);assert.deepEqual(economy.craftedInventory,itemValues(()=>0));assert.deepEqual(economy.craftedDisplayed,itemValues(()=>0));
     assert.equal(economy.objectives.craftedSale,'in-progress');assert.equal(economy.objectives.firstDay,phase==='closed'?'ready':'in-progress');assert.equal(economy.objectives.perfectDay,phase==='closed'?'ready':'in-progress');
-    assert.deepEqual(store.getSnapshot().day,old.state.day);assert.equal(JSON.parse(encodeSave({...store.getSnapshot(),checkpoint:old.state.checkpoint})).version,SAVE_VERSION);
+    assert.deepEqual(store.getSnapshot().day,{...old.state.day,explorationUsed:0});assert.equal(JSON.parse(encodeSave({...store.getSnapshot(),checkpoint:old.state.checkpoint})).version,SAVE_VERSION);
 });
 
 test('수령 보상·잔액 불일치, 불가능한 제작 재고·진열, 목표 누락과 미래 저장 보호',()=>{
     const store=createGameStore();perfectCraftedDay(store);const raw=encodeSave({...store.getSnapshot(),checkpoint:'closed'});
     for(const change of [
         v=>{delete v.state.economy.objectives;},v=>{delete v.state.economy.objectives.firstDay;},v=>{v.state.economy.objectives.firstDay='claimed';},v=>{v.state.economy.objectives.craftedSale='bad';},
-        v=>{delete v.state.economy.craftedInventory;},v=>{v.state.economy.craftedInventory.potion=1;},v=>{v.state.economy.craftedDisplayed.potion=1;},v=>{v.state.economy.craftedInventory.herb=1;},v=>{v.version=8;},
+        v=>{delete v.state.economy.craftedInventory;},v=>{v.state.economy.craftedInventory.potion=1;},v=>{v.state.economy.craftedDisplayed.potion=1;},v=>{v.state.economy.craftedInventory.herb=1;},v=>{v.version=SAVE_VERSION+1;},
     ]){const value=JSON.parse(raw);change(value);const bad=JSON.stringify(value);assert.equal(decodeSave(bad).ok,false);const p=port(bad),guarded=createGameStore(createSaveRepository(p));guarded.claimObjective('firstDay');assert.equal(p.raw,bad);assert.equal(p.writes,0);}
 });

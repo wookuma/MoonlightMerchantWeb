@@ -135,7 +135,7 @@ test('보고서 누락·수량 불일치·잘못된 상품/결과·중복 방문
         v=>{v.state.day.report.plan.pop();},v=>{v.state.day.report.visits.pop();},
         v=>{v.state.day.report.plan[0]='unknown';},v=>{v.state.day.report.visits[0].itemId='potion';},
         v=>{v.state.day.report.visits[0].result='unknown';},v=>{v.state.day.report.visits[1].id=1;},
-        v=>{v.state.day.report.visits[0].result='display';},v=>{v.version=8;},
+        v=>{v.state.day.report.visits[0].result='display';},v=>{v.version=SAVE_VERSION+1;},
     ]) {
         const value=JSON.parse(raw);change(value);const bad=JSON.stringify(value);
         assert.equal(decodeSave(bad).ok,false);

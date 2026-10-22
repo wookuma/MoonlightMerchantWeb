@@ -16,6 +16,7 @@ export type ShopDay = Readonly<{
     number: number;
     phase: 'preparing' | 'open' | 'closed';
     completedVisits: number;
+    explorationUsed: number;
     baseline: Pick<EconomyState, 'revenue' | 'costOfGoodsSold' | 'unitsSold'> | null;
     summary: DaySummary | null;
     report: SalesReport | null;
@@ -23,7 +24,7 @@ export type ShopDay = Readonly<{
 
 export function createDay(number = 1): ShopDay {
     if (!Number.isSafeInteger(number) || number < 1) throw new RangeError('날짜는 1 이상의 안전한 정수여야 합니다.');
-    return { number, phase: 'preparing', completedVisits: 0, baseline: null, summary: null, report: null };
+    return { number, phase: 'preparing', completedVisits: 0, explorationUsed: 0, baseline: null, summary: null, report: null };
 }
 
 export function openDay(day: ShopDay, economy: EconomyState): ShopDay {

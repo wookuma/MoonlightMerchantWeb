@@ -117,7 +117,7 @@ test('개점 후 중간 복귀해도 같은 날짜의 수요·순서 복원, 확
     assert.notDeepEqual(counts(next),counts(plan));
     store.startDay();assert.deepEqual(runDay(store),next);
     assert.equal(JSON.parse(p.raw).version,SAVE_VERSION);
-    assert.equal(SAVE_VERSION,7);
+    assert.equal(SAVE_VERSION,8);
 });
 
 test('누적 방문 수가 다른 이력도 같은 날짜·확장 단계이면 구성 동일', () => {

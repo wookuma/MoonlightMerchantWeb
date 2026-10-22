@@ -75,18 +75,18 @@ for(const phase of ['preparing','closed'])test(`실제 버전 5 ${phase} 저장:
     const p=port(raw),store=createGameStore(createSaveRepository(p));assert.equal(store.getSnapshot().saveInfo.status,'saved');
     assert.equal(p.raw,raw);assert.equal(p.writes,0);
     const {economy,day}=store.getSnapshot();
-    assert.deepEqual(day,old.state.day);assert.equal(economy.gold,old.state.economy.gold);
+    assert.deepEqual(day,{...old.state.day,explorationUsed:0});assert.equal(economy.gold,old.state.economy.gold);
     for(const field of ['inventory','inventoryCosts','displayed','prices'])for(const id of ['herb','potion','sword'])assert.equal(economy[field][id],old.state.economy[field][id]);
     for(const id of ['mushroom','manaPotion']){assert.equal(economy.inventory[id],0);assert.equal(economy.inventoryCosts[id],0);assert.equal(economy.displayed[id],0);}
     assert.equal(economy.prices.mushroom,40);assert.equal(economy.prices.manaPotion,90);
     const rewritten=encodeSave({...store.getSnapshot(),checkpoint:old.state.checkpoint});assert.equal(JSON.parse(rewritten).version,SAVE_VERSION);
-    assert.deepEqual(decodeSave(rewritten).state.day,old.state.day);
+    assert.deepEqual(decodeSave(rewritten).state.day,{...old.state.day,explorationUsed:0});
     if(phase==='closed')store.nextDay();store.startDay();finishDay(store);assert.equal(store.getSnapshot().saveInfo.status,'saved');
 });
 
 test('새 버전 상품 필드 누락·잘못된 가격·미지원 버전은 자동 보충 없이 보호',()=>{
     const store=createGameStore(),raw=encodeSave({...store.getSnapshot(),checkpoint:'before-open'});
-    for(const change of [v=>{delete v.state.economy.inventory.mushroom;},v=>{delete v.state.economy.inventoryCosts.manaPotion;},v=>{v.state.economy.prices.manaPotion=0;},v=>{v.state.economy.displayed.mushroom=1;},v=>{v.version=8;}]){
+    for(const change of [v=>{delete v.state.economy.inventory.mushroom;},v=>{delete v.state.economy.inventoryCosts.manaPotion;},v=>{v.state.economy.prices.manaPotion=0;},v=>{v.state.economy.displayed.mushroom=1;},v=>{v.version=SAVE_VERSION+1;}]){
         const value=JSON.parse(raw);change(value);const bad=JSON.stringify(value);assert.equal(decodeSave(bad).ok,false);
         const p=port(bad),guarded=createGameStore(createSaveRepository(p));guarded.startDay();assert.equal(p.raw,bad);assert.equal(p.writes,0);
     }

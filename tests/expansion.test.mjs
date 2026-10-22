@@ -136,7 +136,7 @@ test('새 저장의 단계·비용·잔액·진열 한도·방문 수 불일치�
         v=>{v.state.economy.expansionLevel=0.5;}, v=>{delete v.state.economy.expansionSpend;},
         v=>{v.state.economy.expansionSpend=0;}, v=>{v.state.economy.gold=1000;},
         v=>{v.state.economy.displayed.herb=6;}, v=>{v.state.visitCount=7;},
-        v=>{v.state.day.number=2;v.state.visitCount=6;}, v=>{v.version=8;},
+        v=>{v.state.day.number=2;v.state.visitCount=6;}, v=>{v.version=SAVE_VERSION+1;},
     ]) {
         const v=JSON.parse(raw); mutate(v); const bad=JSON.stringify(v);
         assert.equal(decodeSave(bad).ok,false);

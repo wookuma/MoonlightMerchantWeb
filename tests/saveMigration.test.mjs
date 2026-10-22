@@ -20,7 +20,7 @@ for (const file of ['save-v1-preparing.json', 'save-v1-closed.json', 'save-v2-pr
     assert.equal(decoded.ok, true);
     const costs = legacy.state.economy.inventoryCosts ?? { herb: legacy.state.economy.inventory.herb * 20, potion: legacy.state.economy.inventory.potion * 40, sword: legacy.state.economy.inventory.sword * 120 };
     assert.deepEqual(decoded.state.economy, { ...legacy.state.economy, ...expectedObjectiveMetadata(legacy.state.day), expansionLevel: 0, expansionSpend: 0, inventory: { ...legacy.state.economy.inventory, mushroom: 0, manaPotion: 0 }, prices: { ...legacy.state.economy.prices, mushroom: 40, manaPotion: 90 }, inventoryCosts: { ...costs, mushroom: 0, manaPotion: 0 }, displayed: { herb: legacy.state.economy.displayed?.herb ?? Math.min(3, legacy.state.economy.inventory.herb), potion: legacy.state.economy.displayed?.potion ?? Math.min(3, legacy.state.economy.inventory.potion), sword: legacy.state.economy.displayed?.sword ?? Math.min(3, legacy.state.economy.inventory.sword), mushroom: 0, manaPotion: 0 } });
-    assert.deepEqual(decoded.state.day, { ...legacy.state.day, report: null });
+    assert.deepEqual(decoded.state.day, { ...legacy.state.day, report: null, explorationUsed: 0 });
     assert.equal(decoded.state.visitCount, legacy.state.visitCount);
     assert.equal(decoded.state.checkpoint, legacy.state.checkpoint);
     const port = storage(raw);
@@ -62,7 +62,7 @@ test('구버전 변환 후 저장 실패 시 원본 버전 1 문자열 그대로
 test('손상된 버전 1과 미래 버전은 호환으로 오인하지 않고 덮어쓰기 방지', () => {
     const bad = JSON.parse(fixture('save-v1-preparing.json'));
     bad.state.economy.inventory.herb++;
-    for (const raw of [JSON.stringify(bad), JSON.stringify({ version: 8, state: {} })]) {
+    for (const raw of [JSON.stringify(bad), JSON.stringify({ version: SAVE_VERSION + 1, state: {} })]) {
         const port = storage(raw);
         const store = createGameStore(createSaveRepository(port));
         assert.equal(store.getSnapshot().saveInfo.status, 'blocked');
@@ -87,5 +87,5 @@ test('버전 3의 재고 원가 누락·음수·소수·합계 불일치·빈 �
         const value = JSON.parse(raw); mutate(value.state);
         assert.equal(decodeSave(JSON.stringify(value)).ok, false);
     }
-    assert.equal(SAVE_VERSION, 7);
+    assert.equal(SAVE_VERSION, 8);
 });

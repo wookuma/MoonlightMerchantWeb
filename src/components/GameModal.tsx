@@ -30,7 +30,7 @@ export function GameModal({ children }: { children: ReactNode }) {
             const bounds = event.currentTarget.getBoundingClientRect();
             if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) gameUiStore.close();
         }}>
-        <header className="game-modal-head"><div><span className="eyebrow">{menu ? gameMenus[menu].kicker : ''}</span><h2 id="game-modal-title" ref={heading} tabIndex={-1}>{menu ? gameMenus[menu].title : ''}</h2></div><button className="shell-icon-button" aria-label="메뉴 닫기" onClick={() => gameUiStore.close()}>×</button></header>
+        <header className="game-modal-head"><div className="modal-title-group"><span className={`modal-menu-art dock-art ${menu ?? 'settings'}`} aria-hidden="true" /><div><span className="eyebrow">{menu ? gameMenus[menu].kicker : ''}</span><h2 id="game-modal-title" ref={heading} tabIndex={-1}>{menu ? gameMenus[menu].title : ''}</h2></div></div><button className="shell-icon-button" aria-label="메뉴 닫기" onClick={() => gameUiStore.close()}>×</button></header>
         {menu !== 'settings' && <ShopFlowNavigation />}
         <div className="game-modal-content">{children}</div>
         <div className={`modal-feedback ${success ? '' : 'error'}`} role="status" aria-live="polite" aria-atomic="true"><span key={revision}>{message}</span></div>

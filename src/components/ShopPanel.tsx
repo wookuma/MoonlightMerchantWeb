@@ -49,7 +49,7 @@ function ProductCard({ item, mode }: { item: typeof items[number]; mode: 'trade'
         <form className="quantity-row display-target" onSubmit={updateDisplay}>
             <label htmlFor={`display-target-${item.id}`}>목표 진열</label>
             <input id={`display-target-${item.id}`} aria-label={`${item.name} 목표 진열 수량`} type="number" min="0" max={Math.min(capacity, count)} step="1" required disabled={!preparing} value={displayDraft ?? String(displayed)} onChange={event => setDisplayDraft(event.target.value)} />
-            <span>개</span><button type="submit" disabled={!preparing || !displayPreview.ok || target === displayed}>진열 적용</button>
+            <span>개</span><button type="submit" disabled={!preparing || !displayPreview.ok || target === displayed}>상품 등록 적용</button>
         </form>
         {preparing && <div className="quantity-presets"><button disabled={displayed === 0} onClick={() => { gameStore.setDisplay(item.id,0); setDisplayDraft(null); }}>모두 회수</button><button disabled={displayed === Math.min(capacity,count)} onClick={() => { gameStore.setDisplay(item.id,Math.min(capacity,count)); setDisplayDraft(null); }}>가능한 만큼 진열</button></div>}
         {preparing && <p className="order-preview">{displayPreview.ok ? `적용 후 진열 ${target}개 · 보관 ${displayPreview.state.inventory[item.id] - displayPreview.state.displayed[item.id]}개` : displayPreview.message}</p>}
@@ -82,18 +82,20 @@ function ProductCard({ item, mode }: { item: typeof items[number]; mode: 'trade'
     </article>;
 }
 
-export function ShopPanel() {
+export function ShopPanel({ shelfItem = null }: { shelfItem?: typeof items[number]['id'] | null }) {
     const { economy, day } = useSyncExternalStore(gameStore.subscribe, gameStore.getSnapshot);
-    const [selected, setSelected] = useState<typeof items[number]['id']>('herb');
-    const [mode, setMode] = useState<'trade' | 'display'>(day.phase === 'preparing' ? 'trade' : 'display');
+    const [selected, setSelected] = useState<typeof items[number]['id']>(shelfItem ?? 'herb');
+    const [mode, setMode] = useState<'trade' | 'display'>(shelfItem || day.phase !== 'preparing' ? 'display' : 'trade');
     const item = items.find(item => item.id === selected)!;
     return <aside className="shop-panel" aria-label="상품 관리">
-        <div className="management-tabs" aria-label="상품 관리 방식"><button aria-pressed={mode === 'trade'} onClick={() => setMode('trade')}>① 매입·재고 정리</button><button aria-pressed={mode === 'display'} onClick={() => setMode('display')}>② 진열·가격</button></div>
+        {shelfItem && <p className="shelf-registration-note">{items.find(entry => entry.id === shelfItem)?.name} 매대에서 상품 관리로 들어왔어요. {day.phase === 'preparing' ? '보관 재고를 진열 수량으로 등록해 주세요.' : day.phase === 'open' ? '영업 중에는 판매가를 변경하거나 진열 상태를 확인할 수 있어요.' : '아래 다음 날 매입·준비 버튼을 누르면 상품을 등록할 수 있어요.'}</p>}
+        <div className="management-tabs" aria-label="상품 관리 방식"><button aria-pressed={mode === 'trade'} onClick={() => setMode('trade')}>① 매입·재고 정리</button><button aria-pressed={mode === 'display'} onClick={() => setMode('display')}>② 상품 등록·진열</button></div>
         <div className="product-workspace">
             <div className="product-selector" aria-label="상품 선택">{items.map(entry => <button key={entry.id} aria-pressed={selected === entry.id} onClick={() => setSelected(entry.id)} style={{ '--item-color': entry.color } as CSSProperties}><span className={`item-icon ${entry.id}`} aria-hidden="true"><i /></span><span>{entry.name}</span><small>{economy.inventory[entry.id]}개</small></button>)}</div>
             <ProductCard key={item.id} item={item} mode={mode} />
         </div>
-        <p className="panel-note">{day.phase === 'preparing' ? '매입한 상품은 보관함에 들어갑니다. ② 진열·가격에서 진열해야 손님이 구매합니다. 보관 재고 판매는 손님 판매와 별개의 즉시 거래입니다.' : day.phase === 'open' ? '영업 중에는 판매가만 변경할 수 있어요. 매입·제작·진열은 영업 마감 후 다음 날 준비에서 가능합니다.' : '오늘 영업이 마감되었습니다. 아래 다음 날 매입·준비 버튼을 누르면 거래할 수 있어요.'}</p>
-        {day.phase === 'preparing' && mode === 'trade' && <button className="workflow-secondary" onClick={() => setMode('display')}>매입 완료 · 진열·가격 설정 →</button>}
+        <p className="panel-note">{day.phase === 'preparing' ? '매입한 상품은 보관함에 들어갑니다. ② 상품 등록·진열에서 등록해야 손님이 구매합니다. 보관 재고 판매는 손님 판매와 별개의 즉시 거래입니다.' : day.phase === 'open' ? '영업 중에는 판매가만 변경할 수 있어요. 매입·제작·진열은 영업 마감 후 다음 날 준비에서 가능합니다.' : '오늘 영업이 마감되었습니다. 아래 다음 날 매입·준비 버튼을 누르면 거래할 수 있어요.'}</p>
+        {day.phase === 'preparing' && mode === 'display' && <button className="workflow-secondary" onClick={() => setMode('trade')}>재고가 필요하면 · 이 상품 매입하기 →</button>}
+        {day.phase === 'preparing' && mode === 'trade' && <button className="workflow-secondary" onClick={() => setMode('display')}>매입 완료 · 상품 등록·진열 →</button>}
     </aside>;
 }

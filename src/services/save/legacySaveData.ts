@@ -6,7 +6,9 @@ import { declineReasons } from '../../domain/salesReport.ts';
 import type { SalesReport } from '../../domain/salesReport.ts';
 import { CUSTOMERS_PER_DAY } from '../../domain/shopDay.ts';
 import { getDayPlan } from './legacyCatalogue.ts';
-import type { DaySummary, ShopDay } from '../../domain/shopDay.ts';
+import type { DaySummary, ShopDay as CurrentShopDay } from '../../domain/shopDay.ts';
+
+type ShopDay = Omit<CurrentShopDay, 'explorationUsed'>;
 
 export const SAVE_VERSION = 5;
 export type SavePoint = 'before-open' | 'closed' | 'next-day' | 'new-game';

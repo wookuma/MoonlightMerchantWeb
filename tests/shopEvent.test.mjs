@@ -71,7 +71,7 @@ test('영업 중 복귀 후 이벤트·순서 동일, 과거 저장 원문·마�
     const event=getShopEvent(2),plan=getDayPlan(2);store.startDay();finishOne(store);finishOne(store);
     store=createGameStore(createSaveRepository(p));assert.equal(store.getSnapshot().day.phase,'preparing');
     assert.deepEqual(getShopEvent(store.getSnapshot().day.number),event);store.startDay();assert.deepEqual(finishDay(store),plan);
-    assert.equal(JSON.parse(p.raw).version,SAVE_VERSION);assert.equal(SAVE_VERSION,7);
+    assert.equal(JSON.parse(p.raw).version,SAVE_VERSION);assert.equal(SAVE_VERSION,8);
     const raw=readFileSync(new URL('./fixtures/save-v5-closed.json',import.meta.url),'utf8'),legacy=JSON.parse(raw),oldPort=port(raw);
     const loaded=createGameStore(createSaveRepository(oldPort));assert.equal(oldPort.raw,raw);assert.equal(oldPort.writes,0);
     assert.deepEqual(loaded.getSnapshot().day.report,legacy.state.day.report);
